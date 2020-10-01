@@ -4,6 +4,7 @@
 from pathlib import Path
 import glob
 import time
+from time_strings import UTC_NOW_STRING
  
 
 def calculate_temp(raw):
@@ -44,7 +45,7 @@ def read_temp():
         celcius, farenheiht = temps
         out = [f"Device:{i} ID# {Path(device).name} , {celcius:.2f}C {farenheiht:.1f}F"]
         measurements.append(out)
-    return measurements
+    return (UTC_NOW_STRING(), measurements)
 
 
 while True:
