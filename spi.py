@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+BASE_DIRECTORY = '/sys/bus/w1/devices/'
+
 from pathlib import Path
 import glob
 import time
@@ -18,21 +20,20 @@ def calculate_temp(raw):
         return (temp_c, temp_f)
 
 
-base_dir = '/sys/bus/w1/devices/'
-# Find all the devices that match the signature '28'
-temperature_devices = glob.glob(base_dir + '28*')
+def scan_for_devices(directory):
+    # Find all the devices that match the signature '28'
+    temperature_devices = glob.glob(directory + '28*')
+    # isolate the names of the individual devices
+    device_list = []
+    for device in temperature_devices:
+        device_list.append(device)
+    return device_list
 
-# isolate the names of the individual devices
-device_list = []
-for device in temperature_devices:
-    device_list.append(device)
-
-
-def read_temp():
+def read_temp(devices):
     """Poll each of the devices found and build a list of data.
     """
     measurements = []
-    for i, device in enumerate(device_list):
+    for i, device in enumerate(devices):
         # add the sub-directory name that holds the temperature data
         d = Path(device, 'w1_slave')
         # open the file as readonly
@@ -43,11 +44,12 @@ def read_temp():
         temps = calculate_temp(lines)
         # build the result output for this device
         celcius, farenheiht = temps
-        out = [f"Device:{i} ID# {Path(device).name} , {celcius:.2f}C {farenheiht:.1f}F"]
+        out = [f"Device:{i}", f"ID# {Path(device).name}", f"{celcius:.2f}C", f"{farenheiht:.1f}F"]
         measurements.append(out)
     return (UTC_NOW_STRING(), measurements)
 
 
 while True:
-	print(read_temp())	
+    devices = scan_for_devices(BASE_DIRECTORY)
+	print(read_temp(devices))	
 	time.sleep(1)
