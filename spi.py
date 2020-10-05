@@ -51,5 +51,8 @@ def read_temp(devices):
 
 while True:
     devices = scan_for_devices(BASE_DIRECTORY)
-	print(read_temp(devices))	
-	time.sleep(1)
+    timestamp, device_data = read_temp(devices)
+    print(timestamp)
+    for device in device_data:
+        print(device)	
+    time.sleep(6)
