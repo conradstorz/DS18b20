@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+# version 2.0
 """Standardize time strings and datetime objects used in a project.
 """
 
