@@ -7,12 +7,14 @@
 from datetime import datetime, date
 from time import sleep
 import pytz
+from loguru import logger
 
 
 tz_UTC = pytz.timezone("UTC")
 tz_LOCAL = pytz.timezone("America/Louisville")
 
 
+@logger.catch
 def timefstring(dtobj, tz_name=True):
     """Standardize the format used for timestamp string format.
     Include 3 letter string for timezone if set to True.
