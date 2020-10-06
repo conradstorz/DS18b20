@@ -85,11 +85,15 @@ def gather_names_of_devices(device_details):
 def main_data_gathering_loop():
     while True:
         devices = scan_for_devices(SPI_DEVICE_PATH)
-        timestamp, device_data = read_temp(devices)
-        print(timestamp)
-        for device in device_data:
-            print(device)
-        write_csv(device_data, filename=timestamp, use_subs=True)
+        if len(devices) > 0:
+            timestamp, device_data = read_temp(devices)
+            print(timestamp)
+            for device in device_data:
+                print(device)
+            write_csv(device_data, filename=timestamp, use_subs=True)
+        else:
+            print('No devices found.')
+        print('Sleeping 6 seconds...')
         time.sleep(6)
 
 
