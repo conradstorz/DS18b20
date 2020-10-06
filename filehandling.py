@@ -102,6 +102,7 @@ def check_and_validate(fname, direc, rename=True, use_subdirs=False):
     else:
         dest = ""
     OUT_PATH = Path(direc, dest)
+    OUT_PATH.mkdir(parents=True, exist_ok=True)
     i = 0
     while Path(OUT_PATH, clean_fn).exists():
         if rename:

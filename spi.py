@@ -2,14 +2,19 @@
 # -*- coding: utf-8 -*-
 
 SPI_DEVICE_PATH = "/sys/bus/w1/devices/"
+SPI_DEVICE_NAMES_FILE = "SPI_devices.json"
 
 from pathlib import Path
 import glob
 import time
+import json
 from time_strings import UTC_NOW_STRING
 from data2csv import write_csv
 from loguru import logger
 
+with open(SPI_DEVICE_NAMES_FILE) as json_data:
+    device_details = json.load(json_data)
+# this dictionary will contain information about individual known devices
 
 @logger.catch
 def calculate_temp(raw):
@@ -51,6 +56,7 @@ def read_temp(devices):
         out = {
             "TimeStamp": UTC_NOW_STRING(),
             "ID": f"ID# {Path(device).name}",
+            "Location": f"{device_details[device]}",
             "Celcius": f"{celcius:.2f}C",
             "Farenheiht": f"{farenheiht:.1f}F",
         }
@@ -58,11 +64,43 @@ def read_temp(devices):
     return (UTC_NOW_STRING(), measurements)
 
 
-while True:
+@logger.catch
+def gather_names_of_devices(device_details):
+    """Take the list of device identifiers and compare to the file of known devices.
+    For items not found to have been previously named, allow interactive naming by operator.
+    """
     devices = scan_for_devices(SPI_DEVICE_PATH)
-    timestamp, device_data = read_temp(devices)
-    print(timestamp)
-    for device in device_data:
-        print(device)
-    write_csv(device_data, filename=timestamp, use_subs=True)
-    time.sleep(6)
+    for device in devices:
+        if device in device_details.keys():
+            print(f'{device} is known.')
+        else:
+            name = str(input(f'Would you like to enter a name for device {device}?'))
+            if len(name) <= 0:
+                name = 'unknown'
+            device_details[device] = name
+    return devices
+
+
+@logger.catch
+def main_data_gathering_loop():
+    while True:
+        devices = scan_for_devices(SPI_DEVICE_PATH)
+        timestamp, device_data = read_temp(devices)
+        print(timestamp)
+        for device in device_data:
+            print(device)
+        write_csv(device_data, filename=timestamp, use_subs=True)
+        time.sleep(6)
+
+
+@logger.catch
+def check_devices_have_names():
+    gather_names_of_devices(device_details)
+    print(device_details)
+    with open(SPI_DEVICE_NAMES_FILE, 'w') as json_outfile:
+        json.dump(device_details, json_outfile)
+
+
+if __name__ == "__main__":
+    check_devices_have_names()
+    main_data_gathering_loop()
