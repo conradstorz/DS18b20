@@ -14,6 +14,16 @@ from loguru import logger
 def write_csv(data, filename="temp.csv", directory="CSV_DATA", use_subs=False):
     """'data' is expected to be a list of dicts 
     Take data and write all fields to storage as csv with headers from keys.
+    if filename already exists automatically append to end of file if headers match.
+
+with open(r'names.csv', 'a', newline='') as csvfile:
+    fieldnames = ['This','aNew']
+    writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+    writer.writerow({'This':'is', 'aNew':'Row'})
+
+    Process: file exist? headers match? append data.
+    file exist? headers mis-match. raise exception
+    no file? create file and save data.
     """
     # create csv file path
     dirobj = Path(Path.cwd(), directory)
