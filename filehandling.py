@@ -25,6 +25,19 @@ this_folder3 = Path(__file__).parent
 
 # folder_where_python_was_run = Path.cwd()
 
+# access file stats
+# >>> print(f.stat()) 
+# os.stat_result(st_mode=33206, st_ino=5910974511078979, 
+# st_dev=2320784789, st_nlink=1, st_uid=0, st_gid=0, st_size=4642, 
+# st_atime=1602120383, st_mtime=1602120383, st_ctime=1601554746)
+
+# file last modified timestamp
+# md = f.stat().st_mtime
+# file size
+# sz = f.stat().st_size
+# file permissions
+# mode = f.stat().st_mode
+
 # create a new folder:
 # Path("/my/directory").mkdir(parents=True, exist_ok=True)
 
@@ -79,13 +92,14 @@ def clean_filename_str(fn):
 
 
 @logger.catch
-def create_datebased_subdirectory_Structure(timestamp: str):
+def create_timestamp_subdirectory_Structure(timestamp: str):
     """Takes a string (2020-10-05_020600UTC) representing a datetime 
     and attempts to create a directory structure 
-    in the format ./YYYY/MM/DD/ and returns a Pathobj to the directory.
+    in the format ./YYYY/MM/DD/HH and returns a Pathobj to the directory.
     """
-    date, _time = timestamp.split('_') # split date from time
+    date, time = timestamp.split('_') # split date from time
     yy, mm, dd = date.split('-')
+    _hh = time[:2]
     OP = f'{yy}/{mm}/{dd}/'
     return OP
 
@@ -98,7 +112,7 @@ def check_and_validate(fname, direc, rename=True, use_subdirs=False):
     clean_fn = clean_filename_str(fname)
     direc.mkdir(parents=True, exist_ok=True)
     if use_subdirs:
-        dest = create_datebased_subdirectory_Structure(clean_fn)
+        dest = create_timestamp_subdirectory_Structure(clean_fn)
     else:
         dest = ""
     OUT_PATH = Path(direc, dest)
