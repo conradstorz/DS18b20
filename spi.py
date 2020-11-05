@@ -10,7 +10,7 @@ THINGSPEAK_FIELD1 = 'field1'
 THINGSPEAK_FIELD2 = 'field2'
 THINGSPEAK_FIELD3 = 'field3'
 THINGSPEAK_FIELD4 = 'field4'
-THINGSPEAK_WRITE_URL = f'https://api.thingspeak.com/update?api_key={THINGSPEAK_WRITEKEY}&field1=0&field2=0&field3=0&field4=0'
+THINGSPEAK_WRITE_URL = f'https://api.thingspeak.com/update?api_key={THINGSPEAK_WRITEKEY}'
 
 from pathlib import Path
 import glob
@@ -151,7 +151,12 @@ def send_to_thingspeak(data, names):
     Returns:
         Nothing
     """
-    with urllib.request.urlopen(THINGSPEAK_WRITE_URL) as response:
+    fields = ''
+    for idx, device in enumerate(data):
+        fields = f'{fields}&field{idx+1}={device["Farenheiht"]}'
+    url = f'{THINGSPEAK_WRITE_URL}{fields}'
+    print(url)
+    with urllib.request.urlopen(url) as response:
         html = response.read()
 
 
