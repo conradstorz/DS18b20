@@ -50,12 +50,16 @@ def retreive_device_names():
 @logger.catch
 def calculate_temp(raw):
     """Accepts raw output of DS18b20 sensor and returns a tuple of temp in C and F."""
-    equals_pos = raw[1].find("t=")
+    equals_pos = -1
+    if len(raw) >= 2:
+        equals_pos = raw[1].find("t=")
     if equals_pos != -1:
         temp_string = raw[1][equals_pos + 2 :]
         temp_c = float(temp_string) / 1000.0
         temp_f = temp_c * 9.0 / 5.0 + 32.0
         return (temp_c, temp_f)
+    else:
+        return (0,0)
 
 
 @logger.catch
@@ -111,6 +115,11 @@ def Read_Device(devices: list):
                 "RAW DATA": lines,
             }
             measurements.append(out)
+        if len(measurements) <= 0:
+            raise IOError('No measurements found.')
+    else:
+        raise IOError('No Devices declared.')
+
     return (UTC_NOW_STRING(), measurements)
 
 
@@ -166,7 +175,10 @@ def main_data_gathering_loop():
         retreive_device_names()
         devices = check_devices_have_names()
         if len(devices) > 0:
-            timestamp, device_data = Read_Device(devices)
+            try:
+                timestamp, device_data = Read_Device(devices)
+            except IOError as e:
+                print('Devices not responding.')
             output_directory = create_timestamp_subdirectory_Structure(timestamp)
             OD = f"{OUTPUT_ROOT}{output_directory}"
             for device in device_data:
