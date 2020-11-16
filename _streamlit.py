@@ -5,6 +5,7 @@ import urllib.request
 import requests
 from pprint import pprint
 import json
+import pandas as pd
 
 def send_tweet(tweet):
     """Uses ThingSpeak ThingTweet to send tweets.
@@ -59,6 +60,10 @@ url_str = 'https://api.thingspeak.com/channels/1216774/feeds.json'
 json_str = get_json_from_ThingSpeak(url_str)
 
 dict_data = display_details_of_json_str(json_str)
+
+feeds_dataframe = pd.DataFrame(dict_data["feeds"])
+
+print(feeds_dataframe)
 
 def time_period():
     """[summary]
