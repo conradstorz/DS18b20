@@ -6,7 +6,7 @@ When more than 8 data monitoring points exist, this program will have the abilit
 specified ThingSpeak Channels.
 
 """
-DEBUG = True
+DEBUG = False
 
 from pathlib import Path
 import glob
