@@ -248,8 +248,8 @@ def main_data_gathering_loop():
                 send_to_thingspeak(device_data)
         else:
             print("No devices found.")
-        print("Sleeping 6 seconds...")
-        time.sleep(6)
+        print("Sleeping 10 seconds...")
+        time.sleep(10)
 
 
 @logger.catch
@@ -257,7 +257,7 @@ def check_devices_have_names():
     global DEVICE_DESCRIPTIONS
     devices = check_names_of_devices()
     with open(oneWIRE_DEVICE_NAMES_FILE, "w") as json_outfile:
-        json.dump(DEVICE_DESCRIPTIONS, json_outfile)
+        json.dump(DEVICE_DESCRIPTIONS, json_outfile, indent=4)
     return devices
 
 
