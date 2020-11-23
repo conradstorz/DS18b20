@@ -227,7 +227,7 @@ def send_to_thingspeak(data):
         try:
             with urllib.request.urlopen(url) as response:
                 html = response.read()
-        except urllib.error.HTTPError as e:
+        except (urllib.error.HTTPError, ValueError) as e:
             print(f'Bad URL: {e}')
 
 
