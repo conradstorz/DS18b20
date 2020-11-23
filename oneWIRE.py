@@ -219,7 +219,10 @@ def send_to_thingspeak(data):
             field_tag = f'&field{device_dict["THINGSPEAK_Field"]}={device_dict["Farenheiht"]}'
             fields = f'{fields}{field_tag}'
             TS_Channel = device_dict["THINGSPEAK_Channel"]
-        url = f'{THINGSPEAK_WRITE_URL}{TS_Channel}{fields}'
+        if TS_Channel == 'DUMMY':
+            url = 'Dont_send_anything.com'
+        else:
+            url = f'{THINGSPEAK_WRITE_URL}{TS_Channel}{fields}'
         print(url)
         try:
             with urllib.request.urlopen(url) as response:
