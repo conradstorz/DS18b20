@@ -62,6 +62,7 @@ def retreive_device_names():
 @logger.catch
 def calculate_temp(raw):
     """Accepts raw output of DS18b20 sensor and returns a tuple of temp in C and F."""
+    # TODO add sanity check to hold result in the range of -20f and +500f (-29c and +260c)
     # print(f'Raw temp data: {raw}')
     equals_pos = -1
     if len(raw) >= 2:
@@ -69,8 +70,11 @@ def calculate_temp(raw):
         # print(f'Equals position: {equals_pos}')
     if equals_pos != -1:
         temp_string = raw[1][equals_pos + 2 :]
+        tsfloat = float(temp_string)
+        if tsfloat < -29: tsfloat = -29
+        if tsfloat > 260: tsfloat = 260
         # print(f'Temperature string: {temp_string}')
-        temp_c = float(temp_string) / 1000.0
+        temp_c = tsfloat / 1000.0
         temp_f = temp_c * 9.0 / 5.0 + 32.0
         return (temp_c, temp_f)
     else:
@@ -115,6 +119,7 @@ def Read_Device(devices: list):
     Returns:
         tuple: (UTC time as string, a list of dicts contaning device status)
     """
+    # TODO Add sanity checks to temperature data
     global DEVICE_DESCRIPTIONS
     measurements = []
     if len(devices) > 0:
@@ -127,7 +132,7 @@ def Read_Device(devices: list):
             except FileNotFoundError as e:
                 print(f'Device file not found: {e}')
                 lines = ['garbage', f'dummy t={random.random()*100000}']
-            celcius, farenheiht = calculate_temp(lines)
+            Celsius, farenheiht = calculate_temp(lines)
             try:
                 dev = DEVICE_DESCRIPTIONS[device]
                 location_name = f"{dev['Name']}"
@@ -142,13 +147,18 @@ def Read_Device(devices: list):
                 "TimeStamp": UTC_NOW_STRING(),
                 "ID": f"{Path(device).name}",
                 "Location": location_name,
-                "Celcius": f"{celcius:.2f}",
+                "Celsius": f"{Celsius:.2f}",
                 "Farenheiht": f"{farenheiht:.1f}",
                 "THINGSPEAK_Field": field,
                 "THINGSPEAK_Channel": channel,
                 "RAW DATA": lines,
             }
-            measurements.append(out)
+            if Celsius == farenheiht:
+                # Only -40 would be an exact match and this program ignores temps that low.
+                # If they are equal it is because they both are Zero which is impossible.
+                print('Error obtaining temperature readings.')
+            else:
+                measurements.append(out)
         if len(measurements) <= 0:
             raise IOError('No measurements found.')
     else:
