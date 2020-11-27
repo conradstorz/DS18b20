@@ -4,7 +4,7 @@
 This version introduces expanded ThingSpeak functionality. Specifically ThingSpeak only allows a max of 8 datapoints.
 When more than 8 data monitoring points exist, this program will have the ability to send individual points to
 specified ThingSpeak Channels.
-
+# TODO implement logging
 """
 DEBUG = False
 
@@ -60,10 +60,12 @@ def retreive_device_names():
 
 
 @logger.catch
-def calculate_temp(raw):
-    """Accepts raw output of DS18b20 sensor and returns a tuple of temp in C and F."""
-    # TODO add sanity check to hold result in the range of -20f and +500f (-29c and +260c)
-    # print(f'Raw temp data: {raw}')
+def calculate_temp(raw, min=-29, max=260):
+    """Accepts raw output of DS18b20 sensor.
+    Minimum and Maximum values can be specified to filter out noisy bad results.
+    Returns a tuple of temp in C and F.
+    """
+    # TODO sanitize and validate min/max variables against bad user input.
     equals_pos = -1
     if len(raw) >= 2:
         equals_pos = raw[1].find("t=")
@@ -71,8 +73,8 @@ def calculate_temp(raw):
     if equals_pos != -1:
         temp_string = raw[1][equals_pos + 2 :]
         temp_c = float(temp_string) / 1000.0        
-        if temp_c < float(-29): temp_c = float(-29)
-        if temp_c > float(260): temp_c = float(260)
+        if temp_c < float(min): temp_c = float(min)
+        if temp_c > float(max): temp_c = float(max)
         print(f'Temperature string: {temp_string}')
         temp_f = temp_c * 9.0 / 5.0 + 32.0
         return (temp_c, temp_f)
