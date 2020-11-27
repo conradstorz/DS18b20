@@ -70,15 +70,13 @@ def calculate_temp(raw):
         # print(f'Equals position: {equals_pos}')
     if equals_pos != -1:
         temp_string = raw[1][equals_pos + 2 :]
-        tsfloat = float(temp_string)
-        if tsfloat < -29: tsfloat = -29
-        if tsfloat > 260: tsfloat = 260
-        # print(f'Temperature string: {temp_string}')
-        temp_c = tsfloat / 1000.0
+        temp_c = float(temp_string) / 1000.0        
+        if temp_c < float(-29): temp_c = float(-29)
+        if temp_c > float(260): temp_c = float(260)
+        print(f'Temperature string: {temp_string}')
         temp_f = temp_c * 9.0 / 5.0 + 32.0
         return (temp_c, temp_f)
-    else:
-        return (0,0)
+    return (0,0)
 
 
 @logger.catch
