@@ -5,7 +5,40 @@ import urllib.request
 import requests
 from pprint import pprint
 import json
+import datetime
+import streamlit as st
 import pandas as pd
+import numpy as np
+
+st.title('Hello World')
+
+url_str = 'https://api.thingspeak.com/channels/1216774/feeds.json'
+
+
+DATE_COLUMN = 'date/time'
+# DATA_URL = ('https://s3-us-west-2.amazonaws.com/streamlit-demo-data/uber-raw-data-sep14.csv.gz')
+
+@st.cache
+def load_data(nrows):
+    r = requests.get(url_str)
+    j = r.json()
+    df = pd.DataFrame(j['feeds'])
+    df = df.drop(['entry_id'], axis=1)
+    df["created_at"]=pd.to_datetime(df['created_at'], format="%Y-%m-%dT%H:%M:%SZ")
+    return df
+
+# Create a text element and let the reader know the data is loading.
+data_load_state = st.text('Loading data...')
+# Load 10,000 rows of data into the dataframe.
+data = load_data(10000)
+# Notify the reader that the data was successfully loaded.
+data_load_state.text('Loading data...done! (using st.cache)')
+
+st.subheader('Raw data')
+st.write(data)
+
+hist_values = np.histogram(data['created_at'])
+st.bar_chart(hist_values)
 
 def send_tweet(tweet):
     """Uses ThingSpeak ThingTweet to send tweets.
@@ -21,6 +54,8 @@ def send_tweet(tweet):
         html = response.read()
     return
 
+
+
 def get_json_from_ThingSpeak(url):
     """Returns string of JSON from ThingSpeak website.
 
@@ -32,7 +67,6 @@ def get_json_from_ThingSpeak(url):
     r = response.content.decode('utf-8')
     print(f'with a content of type:{type(r)}')
     return r
-
 
 def display_details_of_json_str(s):
     """Display and Return a dict.
@@ -55,94 +89,21 @@ def display_details_of_json_str(s):
     return str_data
 
 
-url_str = 'https://api.thingspeak.com/channels/1216774/feeds.json'
 
-json_str = get_json_from_ThingSpeak(url_str)
+def Main():
+    json_str = get_json_from_ThingSpeak(url_str)
 
-dict_data = display_details_of_json_str(json_str)
+    dict_data = display_details_of_json_str(json_str)
 
-feeds_dataframe = pd.DataFrame(dict_data["feeds"])
+    feeds_dataframe = pd.DataFrame(dict_data["feeds"])
 
-print(feeds_dataframe)
+    print(feeds_dataframe)
 
-def time_period():
-    """[summary]
-    """
+    def time_period():
+        """[summary]
+        """
 
-def show_plot():
-    """
-    """
+    def show_plot():
+        """
+        """
 
-
-"""
-import streamlit as st
-import time
-import numpy as np
-
-progress_bar = st.sidebar.progress(0)
-status_text = st.sidebar.empty()
-last_rows = np.random.randn(1, 1)
-chart = st.line_chart(last_rows)
-
-for i in range(1, 101):
-    new_rows = last_rows[-1, :] + np.random.randn(5, 1).cumsum(axis=0)
-    status_text.text("%i%% Complete" % i)
-    chart.add_rows(new_rows)
-    progress_bar.progress(i)
-    last_rows = new_rows
-    time.sleep(0.05)
-
-progress_bar.empty()
-
-# Streamlit widgets automatically run the script from top to bottom. Since
-# this button is not connected to any other logic, it just causes a plain
-# rerun.
-st.button("Re-run")
-"""
-
-
-"""
-import streamlit as st
-import pandas as pd
-import altair as alt
-
-@st.cache
-def get_UN_data():
-    AWS_BUCKET_URL = "https://streamlit-demo-data.s3-us-west-2.amazonaws.com"
-    df = pd.read_csv(AWS_BUCKET_URL + "/agri.csv.gz")
-    return df.set_index("Region")
-
-try:
-    df = get_UN_data()
-except urllib.error.URLError as e:
-    st.error(
-        "**This demo requires internet access.** Connection error: %s" % e.reason
-    )
-    return
-
-countries = st.multiselect(
-    "Choose countries", list(df.index), ["China", "United States of America"]
-)
-if not countries:
-    st.error("Please select at least one country.")
-    return
-
-data = df.loc[countries]
-data /= 1000000.0
-st.write("### Gross Agricultural Production ($B)", data.sort_index())
-
-data = data.T.reset_index()
-data = pd.melt(data, id_vars=["index"]).rename(
-    columns={"index": "year", "value": "Gross Agricultural Product ($B)"}
-)
-chart = (
-    alt.Chart(data)
-    .mark_area(opacity=0.3)
-    .encode(
-        x="year:T",
-        y=alt.Y("Gross Agricultural Product ($B):Q", stack=None),
-        color="Region:N",
-    )
-)
-st.altair_chart(chart, use_container_width=True)
-"""
