@@ -4,6 +4,7 @@
 This version introduces expanded ThingSpeak functionality. Specifically ThingSpeak only allows a max of 8 datapoints.
 When more than 8 data monitoring points exist, this program will have the ability to send individual points to
 specified ThingSpeak Channels.
+# TODO permit a reading be sent to multiple channels.
 # TODO implement logging
 """
 DEBUG = False
@@ -234,12 +235,15 @@ def send_to_thingspeak(data):
         else:
             url = f'{THINGSPEAK_WRITE_URL}{TS_Channel}{fields}'
         print(url)
-        try:
-            with urllib.request.urlopen(url) as response:
-                html = response.read()
-        except (urllib.error.HTTPError, ValueError) as e:
-            print(f'Bad URL: {e}')
-
+        if DEBUG:
+            print(f'URL={url} [not sent].')
+        else:
+            try:
+                with urllib.request.urlopen(url) as response:
+                    html = response.read()
+            except (urllib.error.HTTPError, ValueError) as e:
+                print(f'Bad URL: {e}')
+    return None
 
 
 @logger.catch
