@@ -12,7 +12,7 @@ import numpy as np
 
 st.title('Hello World')
 
-url_str = 'https://api.thingspeak.com/channels/1216774/feeds.json'
+url_str = 'https://api.thingspeak.com/channels/1216774/feeds.json?days=2'
 
 
 DATE_COLUMN = 'date/time'
@@ -25,6 +25,11 @@ def load_data(nrows):
     df = pd.DataFrame(j['feeds'])
     df = df.drop(['entry_id'], axis=1)
     df["created_at"]=pd.to_datetime(df['created_at'], format="%Y-%m-%dT%H:%M:%SZ")
+    #df = df.apply(pd.to_numeric) # convert all columns of DataFrame
+    # line above changes datetime obj to int64
+    # convert just columns "field1", 'field2', 'field3', 'field4' and "field5"
+    field_list = ['field1', 'field2', 'field3', 'field4', 'field5']
+    df[field_list] = df[field_list].apply(pd.to_numeric)    
     return df
 
 # Create a text element and let the reader know the data is loading.
