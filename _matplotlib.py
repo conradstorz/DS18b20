@@ -1,25 +1,82 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+# version 2.0
+"""Create a plot of datapoints from ThingSpeak.
+"""
 import requests
 import pandas as pd
 import matplotlib.pyplot as plt
-#from votes import wide as df
+
 url_str = 'https://api.thingspeak.com/channels/1216774/feeds.json?days=2'
 
-def load_data(nrows):
-    r = requests.get(url_str)
+
+def load_json_data_into_dict(url):
+    """Return a dict from a JSON source
+    """
+    r = requests.get(url)
     j = r.json()
-    df = pd.DataFrame(j['feeds'])
+    return j
+
+
+def split_dicts_from_raw_data(json_dict):
+    """Split channels and feeds dicts.
+    """
+    jcd = json_dict['channel'] # equals a dict
+    print(f'channel is type:{type(jcd)}')
+    jfd = json_dict['feeds'] # equals a list of dicts
+    print(f'feeds is type:{type(jfd)}')
+    return (jcd, jfd)
+
+
+def label_feeds_dict_items_with_fieldnames(c_dict, f_dict_list):
+    """Rename feeds fields with channel descriptive names.
+    """
+    new_list = []
+    for measurement in f_dict_list:
+        new_measurement = {}
+        for k1, v1 in measurement.items():
+            new_measurement[k1] = v1
+            if k1 != 'created_at': # don't change measurement date
+                if k1 in c_dict.keys(): 
+                    # copy the descriptive name from the channel into the feed
+                    new_measurement[c_dict[k1]] = v1
+                    # remove non-descriptive entry
+                    del new_measurement[k1]
+        new_list.append(new_measurement)        
+    return new_list
+
+
+def feeds_dict_update(url):
+    """Copy descriptive names of fields into feeds dict.
+    """
+    json_feed = load_json_data_into_dict(url)
+    channel, feeds = split_dicts_from_raw_data(json_feed)
+    updated_feeds = label_feeds_dict_items_with_fieldnames(channel, feeds)
+    #print(updated_feeds)
+    return updated_feeds
+
+
+def load_data_into_pandas(list_of_dicts):
+    df = pd.DataFrame(list_of_dicts)
     df = df.drop(['entry_id'], axis=1)
     df["created_at"]=pd.to_datetime(df['created_at'], format="%Y-%m-%dT%H:%M:%SZ")
+    columns = list(df.columns)
+    columns.remove('created_at')
     #df = df.apply(pd.to_numeric) # convert all columns of DataFrame
     # line above changes datetime obj to int64
-    # convert just columns "field1", 'field2', 'field3', 'field4' and "field5"
-    field_list = ['field1', 'field2', 'field3', 'field4', 'field5']
-    df[field_list] = df[field_list].apply(pd.to_numeric)
+    # convert just columns that are not 'created_at'
+    df[columns] = df[columns].apply(pd.to_numeric)
     return df
 
-df = load_data(10000)
-print(df)
-print(df.dtypes)
-ax = df.plot.line(x='created_at')
 
-plt.show()
+def matplot_main():
+    feeds = feeds_dict_update(url_str)
+    df = load_data_into_pandas(feeds)
+    print(df)
+    print(df.dtypes)
+    ax = df.plot.line(x='created_at')
+
+    plt.show()
+    return None
+
+matplot_main()
