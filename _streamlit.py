@@ -11,8 +11,8 @@ import pandas as pd
 import numpy as np
 
 st.title('Hello World')
-
-url_str = 'https://api.thingspeak.com/channels/1216774/feeds.json?days=2'
+span = '?days=1'
+url_str = f'https://api.thingspeak.com/channels/1216774/feeds.json{span}'
 
 
 DATE_COLUMN = 'date/time'
@@ -24,7 +24,8 @@ def load_data(nrows):
     j = r.json()
     df = pd.DataFrame(j['feeds'])
     df = df.drop(['entry_id'], axis=1)
-    df["created_at"]=pd.to_datetime(df['created_at'], format="%Y-%m-%dT%H:%M:%SZ")
+    df["created_at"] = pd.to_datetime(df['created_at'], format="%Y-%m-%dT%H:%M:%SZ")
+    df.set_index('created_at')
     #df = df.apply(pd.to_numeric) # convert all columns of DataFrame
     # line above changes datetime obj to int64
     # convert just columns "field1", 'field2', 'field3', 'field4' and "field5"
@@ -38,12 +39,12 @@ data_load_state = st.text('Loading data...')
 data = load_data(10000)
 # Notify the reader that the data was successfully loaded.
 data_load_state.text('Loading data...done! (using st.cache)')
-
+data = data.set_index('created_at')
 st.subheader('Raw data')
 st.write(data)
 
-hist_values = np.histogram(data['created_at'])
-st.bar_chart(hist_values)
+#hist_values = np.histogram(data['created_at'])
+st.line_chart(data)
 
 def send_tweet(tweet):
     """Uses ThingSpeak ThingTweet to send tweets.
