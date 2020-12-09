@@ -69,11 +69,20 @@ def load_data_into_pandas(list_of_dicts):
     return df
 
 
+def save_dataframe_to_csv(df):
+    """Create permanent storage on local disk.
+        Use current timestamp to organize storage.
+    Args:
+        df (pandas_dataframe): dataframe to be saved.
+    """
+
+
 def matplot_main():
     feeds = feeds_dict_update(url_str)
     df = load_data_into_pandas(feeds)
     print(df)
     print(df.dtypes)
+    save_dataframe_to_csv(df)
     ax = df.plot.line(x='created_at')
 
     plt.show()

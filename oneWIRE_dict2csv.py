@@ -8,9 +8,10 @@ import csv
 from pathlib import Path
 from filehandling import clean_filename_str
 from loguru import logger
+from time_strings import UTC_NOW_STRING
 
 """'data' is expected to be a list of dicts 
-
+# TODO expand functionality to work with pandas dataframes.
 Process: file exist? headers match? append data.
 file exist? headers mis-match. raise exception
 no file? create file and save data.
@@ -18,17 +19,22 @@ no file? create file and save data.
 
 
 @logger.catch
-def write_csv(data, directory="CSV_DATA"):
+def write_csv(data, directory="CSV_DATA", ts=None, use_cwd=True):
     """Accepts a list of dicts and writes data as CSV in location specified.
+    # TODO add ability to process pandas_dataframes as well as lists of dicts.
     This list can contain multiple readings of one device or multiple devices.
     Each device will be written to a different CSV file and will be appended to any existing file.
-
+    # TODO add timestamp parameter to use as directory structure hint.
+    #   if timestamp leads to an existing file location then append data to existng file.
     Args:
         data (a list of dicts): This list should contain readings of one device or multiple devices.
             dicts contain all relative device data
         directory (str, optional): Sub-directory off of current working directory. Defaults to "CSV_DATA".
     """
+    if ts == None: 
+        ts = UTC_NOW_STRING 
     # create csv file path
+    # TODO use root directory if use_cwd is False
     dirobj = Path(Path.cwd(), directory)
     dirobj.mkdir(parents=True, exist_ok=True)
 
