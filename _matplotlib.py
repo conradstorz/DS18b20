@@ -3,6 +3,7 @@
 # version 2.0
 """Create a plot of datapoints from ThingSpeak.
 """
+from loguru import logger
 import requests
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -18,14 +19,17 @@ url1 = f'{url_str_base}{channel1}{url_str_tail}'
 url2 = f'{url_str_base}{channel2}{url_str_tail}'
 
 
+@logger.catch
 def load_json_data_into_dict(url):
     """Return a dict from a JSON source
     """
+    # TODO check for bad url response
     r = requests.get(url)
     j = r.json()
     return j
 
 
+@logger.catch
 def split_dicts_from_raw_data(json_dict):
     """Split channels and feeds dicts.
     """
@@ -36,6 +40,7 @@ def split_dicts_from_raw_data(json_dict):
     return (jcd, jfd)
 
 
+@logger.catch
 def label_feeds_dict_items_with_fieldnames(c_dict, f_dict_list):
     """Rename feeds fields with channel descriptive names.
     """
@@ -54,6 +59,7 @@ def label_feeds_dict_items_with_fieldnames(c_dict, f_dict_list):
     return new_list
 
 
+@logger.catch
 def feeds_dict_update(url):
     """Copy descriptive names of fields into feeds dict.
     """
@@ -64,6 +70,7 @@ def feeds_dict_update(url):
     return updated_feeds
 
 
+@logger.catch
 def load_data_into_pandas(list_of_dicts):
     df = pd.DataFrame(list_of_dicts)
     df = df.drop(['entry_id'], axis=1)
@@ -74,9 +81,12 @@ def load_data_into_pandas(list_of_dicts):
     # line above changes datetime obj to int64
     # convert just columns that are not 'created_at'
     df[columns] = df[columns].apply(pd.to_numeric)
+    # set 'created_at' as index
+    df.set_index('created_at', inplace = True)
     return df
 
 
+@logger.catch
 def save_dataframe_to_csv(df):
     """Create permanent storage on local disk.
         Use current timestamp to organize storage.
@@ -85,16 +95,21 @@ def save_dataframe_to_csv(df):
     """
 
 
+@logger.catch
 def matplot_main():
     feed1 = feeds_dict_update(url1)
     feed2 = feeds_dict_update(url2)
     df1 = load_data_into_pandas(feed1)
     df2 = load_data_into_pandas(feed2)    
+    df_col_merged = pd.concat([df1, df2], axis=1)
+    #df_smoothed = df_col_merged.bfill(axis=0) # smooth NaN values 
+    df_smoothed = df_col_merged.fillna(value=None, method='pad', axis=0, inplace=False, limit=None, downcast=None)
     print(df1)
     print(df2)    
-    print(df2.dtypes)
-    save_dataframe_to_csv(df1)
-    ax = df2.plot.line(x='created_at')
+    print(df_smoothed.dtypes)
+    print(df_smoothed)
+    save_dataframe_to_csv(df_smoothed)
+    ax = df_smoothed.plot.line() #x='created_at'
 
     plt.show()
     return None
