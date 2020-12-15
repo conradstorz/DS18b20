@@ -24,6 +24,35 @@ for channel in channels:
 
 
 @logger.catch
+def pandas_dataframe(urls):
+    """Returns a dataframe containing datapoints indexed by timestamp from thingspeak urls.
+
+    Args:
+        urls (list): 1 or more urls to retrieve.
+
+    Returns:
+        dataframe: timestamp indexed datapoints from thingspeak.
+    """
+    df_cols_merged = pd.DataFrame()
+    for url in urls:
+        feed = feeds_dict_update(url)
+        df = load_data_into_pandas(feed)
+        print(df)
+        df_cols_merged = pd.concat([df_cols_merged, df], axis=1)
+    # fill in NaN spaces (caused by merging dataframes with different timestamps)
+    # with a value extrapolated from preceeding and following values.
+    df_smoothed = df_cols_merged.fillna(
+        value=None, method="pad", axis=0, inplace=False, limit=None, downcast=None
+    )
+
+    print(df_smoothed.dtypes) # did we convert the fields correctly?
+    print(df_smoothed) # peek at the raw data
+    # put this web data retrieval onto disk for future processing options.
+    save_dataframe_to_csv(df_smoothed, "output_dir", "Filename")    
+    return df_smoothed
+
+
+@logger.catch
 def load_json_data_into_dict(url):
     """Return a dict from a JSON source"""
     # TODO check for bad url response
