@@ -7,7 +7,15 @@ import requests
 import pandas as pd
 import matplotlib.pyplot as plt
 
-url_str = 'https://api.thingspeak.com/channels/1216774/feeds.json?days=2'
+channel1 = '1216774'
+channel2 = '1239835'
+channels = [channel1, channel2]
+
+url_str_base = 'https://api.thingspeak.com/channels/'
+url_str_tail = '/feeds.json?days=2'
+
+url1 = f'{url_str_base}{channel1}{url_str_tail}'
+url2 = f'{url_str_base}{channel2}{url_str_tail}'
 
 
 def load_json_data_into_dict(url):
@@ -78,12 +86,15 @@ def save_dataframe_to_csv(df):
 
 
 def matplot_main():
-    feeds = feeds_dict_update(url_str)
-    df = load_data_into_pandas(feeds)
-    print(df)
-    print(df.dtypes)
-    save_dataframe_to_csv(df)
-    ax = df.plot.line(x='created_at')
+    feed1 = feeds_dict_update(url1)
+    feed2 = feeds_dict_update(url2)
+    df1 = load_data_into_pandas(feed1)
+    df2 = load_data_into_pandas(feed2)    
+    print(df1)
+    print(df2)    
+    print(df2.dtypes)
+    save_dataframe_to_csv(df1)
+    ax = df2.plot.line(x='created_at')
 
     plt.show()
     return None
