@@ -15,6 +15,7 @@ from _thingspeak import pandas_dataframe
 def matplot_main(urls):
     df = pandas_dataframe(urls)
     ax = df.plot.line()
+    print(ax)
     plt.show()
     return None
 
