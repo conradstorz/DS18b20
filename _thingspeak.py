@@ -41,9 +41,8 @@ def pandas_dataframe(urls):
         df_cols_merged = pd.concat([df_cols_merged, df], axis=1)
     # fill in NaN spaces (caused by merging dataframes with different timestamps)
     # with a value extrapolated from preceeding and following values.
-    df_smoothed = df_cols_merged.fillna(
-        value=None, method="pad", axis=0, inplace=False, limit=None, downcast=None
-    )
+    df_smoothed = (df_cols_merged.ffill()+df_cols_merged.bfill())/2
+    # df_smoothed = df_cols_merged.fillna(value=None, method="ffill", axis=0, inplace=False, limit=None, downcast=None)
 
     print(df_smoothed.dtypes) # did we convert the fields correctly?
     print(df_smoothed) # peek at the raw data
