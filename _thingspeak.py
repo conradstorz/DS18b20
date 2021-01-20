@@ -98,13 +98,23 @@ def feeds_dict_update(url):
 
 
 @logger.catch
-def load_data_into_pandas(list_of_dicts):
+def load_data_into_pandas(list_of_dicts, droplist=None):
+    if droplist == None:
+        droplist = ['Inside Machine!', 'Outside Temp!']
+    if type(droplist) != list:
+        print('Droplist arg must be a list.')
+        droplist = []
+    droplist.append('entry_id')
     df = pd.DataFrame(list_of_dicts)
-    # remove "entry_id" field
-    df = df.drop(["entry_id"], axis=1)
+    # remove drop fields
+    columns = list(df.columns)   
+    for fld in droplist:
+        if fld in columns:
+            df = df.drop([fld], axis=1)
     # convert datestring to datetime object
     df["created_at"] = pd.to_datetime(df["created_at"], format="%Y-%m-%dT%H:%M:%SZ")
     columns = list(df.columns)
+    print(columns)
     columns.remove("created_at")
     # convert just columns that are not 'created_at'
     df[columns] = df[columns].apply(pd.to_numeric)
