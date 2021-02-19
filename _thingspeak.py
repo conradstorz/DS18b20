@@ -100,7 +100,7 @@ def feeds_dict_update(url):
 @logger.catch
 def load_data_into_pandas(list_of_dicts, droplist=None):
     if droplist == None:
-        droplist = ['Inside Machine!', 'Outside Temp!']
+        droplist = []
     if type(droplist) != list:
         print('Droplist arg must be a list.')
         droplist = []
