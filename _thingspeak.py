@@ -101,6 +101,9 @@ def feeds_dict_update(url):
 def load_data_into_pandas(list_of_dicts, droplist=None):
     if droplist == None:
         droplist = []
+    if type(droplist) != list:
+        print('Droplist arg must be a list.')
+        droplist = []
     else:
         if type(droplist) != list:
             print('Droplist arg must be a list.')
