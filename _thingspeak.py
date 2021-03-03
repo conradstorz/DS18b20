@@ -36,9 +36,12 @@ def pandas_dataframe(urls):
     df_cols_merged = pd.DataFrame()
     for url in urls:
         feed = feeds_dict_update(url)
-        df = load_data_into_pandas(feed)
-        print(df)
-        df_cols_merged = pd.concat([df_cols_merged, df], axis=1)
+        if feed == []:
+            print(f'No data returned from url: {url}')
+        else:
+            df = load_data_into_pandas(feed)
+            print(df)
+            df_cols_merged = pd.concat([df_cols_merged, df], axis=1)
     # fill in NaN spaces (caused by merging dataframes with different timestamps)
     # with a value extrapolated from preceeding and following values.
     df_smoothed = (df_cols_merged.ffill()+df_cols_merged.bfill())/2
@@ -46,7 +49,7 @@ def pandas_dataframe(urls):
 
     print(df_smoothed.dtypes) # did we convert the fields correctly?
     print(df_smoothed) # peek at the raw data
-    # put this web data retrieval onto disk for future processing options.
+    # put this web data retrieval into permanent storage for future processing options.
     save_dataframe_to_csv(df_smoothed, "output_dir", "Filename")    
     return df_smoothed
 

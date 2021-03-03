@@ -14,9 +14,12 @@ from _thingspeak import pandas_dataframe
 @logger.catch
 def matplot_main(urls):
     df = pandas_dataframe(urls)
-    ax = df.plot.line()
-    print(ax)
-    plt.show()
+    if df.empty:
+        print('No data found to plot.')
+    else:
+        ax = df.plot.line()
+        print(ax)
+        plt.show()
     return None
 
 
