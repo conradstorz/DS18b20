@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """This is version 2 of the 1wire(spi) program.
 This version introduces expanded ThingSpeak functionality. Specifically ThingSpeak only allows a max of 8 datapoints.
