@@ -107,10 +107,6 @@ def load_data_into_pandas(list_of_dicts, droplist=None):
     if type(droplist) != list:
         print('Droplist arg must be a list.')
         droplist = []
-    else:
-        if type(droplist) != list:
-            print('Droplist arg must be a list.')
-            droplist = []
     droplist.append('entry_id')
     df = pd.DataFrame(list_of_dicts)
     # remove drop fields
