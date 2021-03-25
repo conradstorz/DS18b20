@@ -38,9 +38,10 @@ def Configure_logging():
     # Logging Setup
     logger.remove()  # removes the default console logger provided by Loguru.
     # I find it to be too noisy with details more appropriate for file logging.
-    # INFO and messages of higher priority only shown on the console.
+    # INFO and messages of higher shown on the console.
     logger.add(lambda msg: tqdm.write(msg, end=""), format="{message}", level="INFO")
-    # This creates a logging sink and handler that puts all messages at or above the TRACE level into a logfile for each run.
+    # This creates a logging sink and handler that puts all messages at or above the TRACE level 
+    # into a logfile for each run.
     logger.add(
         "./LOGS/file_{time}.log", level="TRACE", encoding="utf8"
     )  # Unicode instructions needed to avoid file write errors.
@@ -56,16 +57,15 @@ def retreive_device_names():
         nothing: effect is GLOBAL
     """
     global DEVICE_DESCRIPTIONS, DESCRIPTIONS_MODIFIED
-    fn = Path(oneWIRE_DEVICE_NAMES_FILE)
+    global_device_names_file = Path(oneWIRE_DEVICE_NAMES_FILE)
     # check to see if descriptions have changed and re-load
-    modified = (
-        fn.stat().st_atime
-    )  # atime, mtime, ctime don't seem to mean what I think. (Pathlib error?)
+    modified = (global_device_names_file.stat().st_atime)  
+    # atime, mtime, ctime don't seem to mean what I think. (Windows idicy)
     if DESCRIPTIONS_MODIFIED != modified:
         DESCRIPTIONS_MODIFIED = modified
         logger.info("Device names have been updated. Re-loading...")
         try:
-            with open(fn) as json_data:
+            with open(global_device_names_file) as json_data:
                 DEVICE_DESCRIPTIONS = json.load(json_data)
                 # this dictionary will contain information about individual known devices                
         except json.decoder.JSONDecodeError as e:
