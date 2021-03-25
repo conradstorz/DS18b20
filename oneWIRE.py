@@ -5,7 +5,6 @@ This version introduces expanded ThingSpeak functionality. Specifically ThingSpe
 When more than 8 data monitoring points exist, this program will have the ability to send individual points to
 specified ThingSpeak Channels.
 # TODO permit a reading be sent to multiple channels.
-# TODO implement logging
 """
 DEBUG = False
 
@@ -19,8 +18,8 @@ from loguru import logger
 import urllib.request
 import collections
 import random
-
-
+from tqdm import tqdm
+import cfsiv_utils.filehandling as fh
 
 oneWIRE_DEVICE_PATH = "/sys/bus/w1/devices/"
 oneWIRE_DEVICE_NAMES_FILE = "oneWIRE_devices.json"
@@ -32,6 +31,21 @@ THINGSPEAK_WRITE_URL = f'https://api.thingspeak.com/update?api_key=' # requires 
 
 DEVICE_DESCRIPTIONS = {}
 DESCRIPTIONS_MODIFIED = None
+
+
+@logger.catch()
+def Configure_logging():
+    # Logging Setup
+    logger.remove()  # removes the default console logger provided by Loguru.
+    # I find it to be too noisy with details more appropriate for file logging.
+    # INFO and messages of higher priority only shown on the console.
+    logger.add(lambda msg: tqdm.write(msg, end=""), format="{message}", level="INFO")
+    # This creates a logging sink and handler that puts all messages at or above the TRACE level into a logfile for each run.
+    logger.add(
+        "./LOGS/file_{time}.log", level="TRACE", encoding="utf8"
+    )  # Unicode instructions needed to avoid file write errors.
+    return None
+
 
 
 @logger.catch
@@ -49,13 +63,13 @@ def retreive_device_names():
     )  # atime, mtime, ctime don't seem to mean what I think. (Pathlib error?)
     if DESCRIPTIONS_MODIFIED != modified:
         DESCRIPTIONS_MODIFIED = modified
-        print("Device names have been updated. Re-loading...")
+        logger.info("Device names have been updated. Re-loading...")
         try:
             with open(fn) as json_data:
                 DEVICE_DESCRIPTIONS = json.load(json_data)
                 # this dictionary will contain information about individual known devices                
         except json.decoder.JSONDecodeError as e:
-            print(f'Error reading JSON file: {e}')
+            logger.info(f'Error reading JSON file: {e}')
 
     return None
 
@@ -70,13 +84,13 @@ def calculate_temp(raw, min=-29, max=260):
     equals_pos = -1
     if len(raw) >= 2:
         equals_pos = raw[1].find("t=")
-        # print(f'Equals position: {equals_pos}')
+        # logger.info(f'Equals position: {equals_pos}')
     if equals_pos != -1:
         temp_string = raw[1][equals_pos + 2 :]
         temp_c = float(temp_string) / 1000.0        
         if temp_c < float(min): temp_c = float(min)
         if temp_c > float(max): temp_c = float(max)
-        print(f'Temperature string: {temp_string}')
+        logger.info(f'Temperature string: {temp_string}')
         temp_f = temp_c * 9.0 / 5.0 + 32.0
         return (temp_c, temp_f)
     return (0,0)
@@ -97,13 +111,13 @@ def Detect_Devices(directory=oneWIRE_DEVICE_PATH):
         temperature_devices = DEBUG_MOCK_DEVICES
     else:
         temperature_devices = glob.glob(directory + "28*")
-    # print(f'Devices: {temperature_devices}')
+    # logger.info(f'Devices: {temperature_devices}')
 
     # isolate the names of the individual devices
     device_list = []
     for device in temperature_devices:
         parts = device.split("/")
-        # print(f'Parts: {parts}')
+        # logger.info(f'Parts: {parts}')
         d = parts[-1:]
         # d is a list with only one string inside
         device_list.append(d[0])
@@ -131,7 +145,7 @@ def Read_Device(devices: list):
                 with open(dev_path, "r") as dev_data:
                     lines = dev_data.readlines()
             except FileNotFoundError as e:
-                print(f'Device file not found: {e}')
+                logger.info(f'Device file not found: {e}')
                 lines = ['garbage', f'dummy t={random.random()*100000}']
             Celsius, farenheiht = calculate_temp(lines)
             try:
@@ -140,7 +154,7 @@ def Read_Device(devices: list):
                 channel = f"{dev['THINGSPEAK_Channel']}"
                 field = f"{dev['THINGSPEAK_Field']}"
             except KeyError as e:
-                print(f'KeyError reading devices: {e}')
+                logger.info(f'KeyError reading devices: {e}')
                 location_name = "UNKNOWN"
                 channel = "UNSPECIFIED"
                 field = 0
@@ -157,7 +171,7 @@ def Read_Device(devices: list):
             if Celsius == farenheiht:
                 # Only -40 would be an exact match and this program ignores temps that low.
                 # If they are equal it is because they both are Zero which is impossible.
-                print('Error obtaining temperature readings.')
+                logger.info('Error obtaining temperature readings.')
             else:
                 measurements.append(out)
         if len(measurements) <= 0:
@@ -234,15 +248,15 @@ def send_to_thingspeak(data):
             url = 'Dont_send_anything.com'
         else:
             url = f'{THINGSPEAK_WRITE_URL}{TS_Channel}{fields}'
-        print(url)
+        logger.info(url)
         if DEBUG:
-            print(f'URL={url} [not sent].')
+            logger.info(f'URL={url} [not sent].')
         else:
             try:
                 with urllib.request.urlopen(url) as response:
                     html = response.read()
             except (urllib.error.HTTPError, ValueError) as e:
-                print(f'Bad URL: {e}')
+                logger.info(f'Bad URL: {e}')
     return None
 
 
@@ -255,17 +269,17 @@ def main_data_gathering_loop():
             try:
                 timestamp, device_data = Read_Device(devices)
             except IOError as e:
-                print(f'Devices not responding: {e}')
+                logger.info(f'Devices not responding: {e}')
             else:
                 output_directory = create_timestamp_subdirectory_Structure(timestamp)
                 OD = f"{OUTPUT_ROOT}{output_directory}"
                 for device in device_data:
-                    print(device)
+                    logger.info(device)
                 write_csv(device_data, directory=OD)
                 send_to_thingspeak(device_data)
         else:
-            print("No devices found.")
-        print("Sleeping 10 seconds...")
+            logger.info("No devices found.")
+        logger.info("Sleeping 10 seconds...")
         time.sleep(10)
 
 
@@ -279,4 +293,5 @@ def check_devices_have_names():
 
 
 if __name__ == "__main__":
+    Configure_logging()
     main_data_gathering_loop()
