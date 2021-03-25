@@ -6,7 +6,7 @@ When more than 8 data monitoring points exist, this program will have the abilit
 specified ThingSpeak Channels.
 # TODO permit a reading be sent to multiple channels.
 """
-DEBUG = False
+DEBUG = True
 
 from pathlib import Path
 import glob
