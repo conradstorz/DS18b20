@@ -8,7 +8,7 @@
 from loguru import logger
 import requests
 import pandas as pd
-
+import cfsiv_utils.filehandling as fh
 
 channel1 = "1216774"
 channel2 = "1239835"
@@ -21,6 +21,23 @@ url_list = []
 for channel in channels:
     url = f"{url_str_base}{channel}{url_str_tail}"
     url_list.append(url)
+
+
+
+@logger.catch
+def dataframe_from_local_csv(directory: str):
+    """Returns a dataframe containing past observations from local CSV files.
+
+    Args:
+        directory (str): Root directory for CSV files.
+
+    Returns:
+        DataFrame: The dataframe containg all requested points.
+    """
+    df = pd.DataFrame
+    files = fh.get_files(directory, '.CSV')
+    return df
+
 
 
 @logger.catch
