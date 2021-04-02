@@ -1,5 +1,4 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
+#-*- coding: utf-8 -*-
 # version 2.0
 """Create a plot of datapoints from ThingSpeak.
 """
