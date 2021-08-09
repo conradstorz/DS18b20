@@ -1,12 +1,47 @@
 {
-    "28egcwharxan": {
-        "Name": "outside",
-        "THINGSPEAK_Channel": "chnl3",
+    "28-011936bb1b3c": {
+        "Name": "Inside_Mach!",
+        "THINGSPEAK_Channel": "3Z8YHDG350XFO9I4",
+        "THINGSPEAK_Field": "5"
+    },
+    "28-01193a7487a7": {
+        "Name": "Compressor_Highside!",
+        "THINGSPEAK_Channel": "3Z8YHDG350XFO9I4",
         "THINGSPEAK_Field": "1"
     },
-    "28iyrsngfmrahuh": {
-        "Name": "inside",
-        "THINGSPEAK_Channel": "chnl12",
+    "28-01193a754cc6": {
+        "Name": "Rght_input!",
+        "THINGSPEAK_Channel": "FHDZI6K5ON5JLIK5",
+        "THINGSPEAK_Field": "1"
+    },
+    "28-01193a5dafc5": {
+        "Name": "Exhaust_Air!",
+        "THINGSPEAK_Channel": "3Z8YHDG350XFO9I4",
+        "THINGSPEAK_Field": "3"
+    },
+    "28-01193a6a8d89": {
+        "Name": "Rght_output!",
+        "THINGSPEAK_Channel": "FHDZI6K5ON5JLIK5",
+        "THINGSPEAK_Field": "2"
+    },
+    "28-01193a736ed4": {
+        "Name": "Water_Bath!",
+        "THINGSPEAK_Channel": "3Z8YHDG350XFO9I4",
+        "THINGSPEAK_Field": "4"
+    },
+    "28-01193a5bc41b": {
+        "Name": "Left_output!",
+        "THINGSPEAK_Channel": "FHDZI6K5ON5JLIK5",
+        "THINGSPEAK_Field": "3"
+    },
+    "28-0119363d47d7": {
+        "Name": "Outside_Temp!",
+        "THINGSPEAK_Channel": "FHDZI6K5ON5JLIK5",
+        "THINGSPEAK_Field": "4"
+    },
+    "28-01193a6cdedd": {
+        "Name": "Left_input!",
+        "THINGSPEAK_Channel": "3Z8YHDG350XFO9I4",
         "THINGSPEAK_Field": "2"
     }
 }
