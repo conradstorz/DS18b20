@@ -1,0 +1,14 @@
+[Unit]
+Description=Bushmans TwitterBot
+After=network-online.target
+
+[Service] 
+ExecStart=/usr/bin/python3 -u Sunset_Village_TwitterBot.py
+WorkingDirectory=/home/pi/Sunset-Village-River-Bot
+StandardOutput=inherit
+StandardError=inherit
+Restart=always
+User=pi
+
+[Install]
+WantedBy=multi-user.target
