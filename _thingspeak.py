@@ -15,7 +15,7 @@ channel2 = "1239835"
 channels = [channel1, channel2]
 
 url_str_base = "https://api.thingspeak.com/channels/"
-url_str_tail = "/feeds.json?days=2"
+url_str_tail = "/feeds.json?days=5"
 
 url_list = []
 for channel in channels:
@@ -36,6 +36,7 @@ def dataframe_from_local_csv(directory: str):
     """
     df = pd.DataFrame
     files = fh.get_files(directory, '.CSV')
+    # ???
     return df
 
 

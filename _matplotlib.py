@@ -3,13 +3,14 @@
 """Create a plot of datapoints from ThingSpeak.
 """
 from loguru import logger
-import pandas as pd
+# import pandas as pd
 import matplotlib.pyplot as plt
 
 from _thingspeak import url_list
 from _thingspeak import pandas_dataframe
 
-import cfsiv_utils.filehandling as fh
+# import cfsiv_utils.filehandling as fh
+
 
 @logger.catch
 def matplot_main(urls):
