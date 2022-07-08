@@ -23,7 +23,6 @@ for channel in channels:
     url_list.append(url)
 
 
-
 @logger.catch
 def dataframe_from_local_csv(directory: str):
     """Returns a dataframe containing past observations from local CSV files.
@@ -35,10 +34,9 @@ def dataframe_from_local_csv(directory: str):
         DataFrame: The dataframe containg all requested points.
     """
     df = pd.DataFrame
-    files = fh.get_files(directory, '.CSV')
+    files = fh.get_files(directory, ".CSV")
     # ???
     return df
-
 
 
 @logger.catch
@@ -55,20 +53,20 @@ def pandas_dataframe(urls):
     for url in urls:
         feed = feeds_dict_update(url)
         if feed == []:
-            print(f'No data returned from url: {url}')
+            print(f"No data returned from url: {url}")
         else:
             df = load_data_into_pandas(feed)
             print(df)
             df_cols_merged = pd.concat([df_cols_merged, df], axis=1)
     # fill in NaN spaces (caused by merging dataframes with different timestamps)
     # with a value extrapolated from preceeding and following values.
-    df_smoothed = (df_cols_merged.ffill()+df_cols_merged.bfill())/2
+    df_smoothed = (df_cols_merged.ffill() + df_cols_merged.bfill()) / 2
     # df_smoothed = df_cols_merged.fillna(value=None, method="ffill", axis=0, inplace=False, limit=None, downcast=None)
 
-    print(df_smoothed.dtypes) # did we convert the fields correctly?
-    print(df_smoothed) # peek at the raw data
+    print(df_smoothed.dtypes)  # did we convert the fields correctly?
+    print(df_smoothed)  # peek at the raw data
     # put this web data retrieval into permanent storage for future processing options.
-    save_dataframe_to_csv(df_smoothed, "output_dir", "Filename")    
+    save_dataframe_to_csv(df_smoothed, "output_dir", "Filename")
     return df_smoothed
 
 
@@ -123,12 +121,12 @@ def load_data_into_pandas(list_of_dicts, droplist=None):
     if droplist == None:
         droplist = []
     if type(droplist) != list:
-        print('Droplist arg must be a list.')
+        print("Droplist arg must be a list.")
         droplist = []
-    droplist.append('entry_id')
+    droplist.append("entry_id")
     df = pd.DataFrame(list_of_dicts)
     # remove drop fields
-    columns = list(df.columns)   
+    columns = list(df.columns)
     for fld in droplist:
         if fld in columns:
             df = df.drop([fld], axis=1)
@@ -154,6 +152,7 @@ def save_dataframe_to_csv(df, OD, FN):
         FN (string): Filename to use
     """
 
+
 @logger.catch
 def send_tweet(tweet):
     """Uses ThingSpeak ThingTweet to send tweets.
@@ -162,9 +161,10 @@ def send_tweet(tweet):
         tweet (Str): A valid tweet string
     """
     import urllib.request
-    API_KEY = '943KI9M4I2TU316Q'
-    TWEET = 'HeyWorld'
-    update_url_target = f'https://api.thingspeak.com/apps/thingtweet/1/statuses/update?api_key={API_KEY}&status={TWEET}'
+
+    API_KEY = "943KI9M4I2TU316Q"
+    TWEET = "HeyWorld"
+    update_url_target = f"https://api.thingspeak.com/apps/thingtweet/1/statuses/update?api_key={API_KEY}&status={TWEET}"
     print(update_url_target)
     with urllib.request.urlopen(update_url_target) as response:
         html = response.read()
