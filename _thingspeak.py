@@ -9,6 +9,10 @@ from loguru import logger
 import requests
 import pandas as pd
 import cfsiv_utils.filehandling as fh
+import cfsiv_utils.time_strings as ts
+from pathlib import Path
+
+OUTPUT_ROOT = "CSV_DATA/"
 
 channel1 = "1216774"
 channel2 = "1239835"
@@ -21,22 +25,6 @@ url_list = []
 for channel in channels:
     url = f"{url_str_base}{channel}{url_str_tail}"
     url_list.append(url)
-
-
-@logger.catch
-def dataframe_from_local_csv(directory: str):
-    """Returns a dataframe containing past observations from local CSV files.
-
-    Args:
-        directory (str): Root directory for CSV files.
-
-    Returns:
-        DataFrame: The dataframe containg all requested points.
-    """
-    df = pd.DataFrame
-    files = fh.get_files(directory, ".CSV")
-    # ???
-    return df
 
 
 @logger.catch
@@ -66,7 +54,13 @@ def pandas_dataframe(urls):
     print(df_smoothed.dtypes)  # did we convert the fields correctly?
     print(df_smoothed)  # peek at the raw data
     # put this web data retrieval into permanent storage for future processing options.
-    save_dataframe_to_csv(df_smoothed, "output_dir", "Filename")
+    time_now_string = ts.UTC_NOW_STRING()
+    date, time = time_now_string.split("_")  # split date from time
+    yy, mm, dd = date.split("-")
+    OP = f"{yy}/{mm}/{dd}/"    
+    OD = f"{OUTPUT_ROOT}{OP}"
+    FN = f"{time_now_string}"    
+    save_dataframe_to_csv(df_smoothed, OD, FN)
     return df_smoothed
 
 
@@ -150,7 +144,16 @@ def save_dataframe_to_csv(df, OD, FN):
         df (pandas_dataframe): dataframe to be saved.
         OD (string): Directory to save file in
         FN (string): Filename to use
+
     """
+    dirobj = Path(Path.cwd(), OD)
+    dirobj.mkdir(parents=True, exist_ok=True)    
+    filepath = fh.check_and_validate_fname(FN, dirobj)
+    # saving the dataframe
+    df.to_csv(filepath)
+    return
+
+    
 
 
 @logger.catch
@@ -169,3 +172,20 @@ def send_tweet(tweet):
     with urllib.request.urlopen(update_url_target) as response:
         html = response.read()
     return
+
+
+@logger.catch
+def dataframe_from_local_csv(directory: str):
+    """Returns a dataframe containing past observations from local CSV files.
+
+    Args:
+        directory (str): Root directory for CSV files.
+
+    Returns:
+        DataFrame: The dataframe containg all requested points.
+    """
+    df = pd.DataFrame
+    files = fh.get_files(directory, ".CSV")
+    # ???
+    return df
+
