@@ -2,6 +2,7 @@
 # version 2.0
 """Create a plot of datapoints from ThingSpeak.
 """
+from time import sleep
 from loguru import logger
 # import pandas as pd
 import matplotlib.pyplot as plt
@@ -19,9 +20,13 @@ def matplot_main(urls):
         print('No data found to plot.')
     else:
         ax = df.plot.line()
+        plt.set_title("Simple Plot")
         print(ax)
-        plt.show()
+        #plt.draw()
+        plt.pause(60*60*24)
     return None
 
 
-matplot_main(url_list)
+while True:
+    matplot_main(url_list)
+    sleep(1)
