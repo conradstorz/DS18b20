@@ -20,7 +20,7 @@ def matplot_main(urls):
         print('No data found to plot.')
     else:
         ax = df.plot.line()
-        plt.set_title("Simple Plot")
+        # .set_title("Simple Plot")
         print(ax)
         #plt.draw()
         plt.pause(60*60*24)
