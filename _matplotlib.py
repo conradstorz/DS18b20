@@ -2,7 +2,7 @@
 # version 2.0
 """Create a plot of datapoints from ThingSpeak.
 """
-from time import sleep
+from time import sleep, time
 from loguru import logger
 # import pandas as pd
 import matplotlib.pyplot as plt
@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 from _thingspeak import url_list
 from _thingspeak import pandas_dataframe
 
-# import cfsiv_utils.filehandling as fh
+import cfsiv_utils.time_strings as ts
 
 
 @logger.catch
@@ -20,8 +20,9 @@ def matplot_main(urls):
         print('No data found to plot.')
     else:
         ax = df.plot.line()
-        # .set_title("Simple Plot")
-        print(ax)
+        ax.set_ylabel('Temperature')
+        ax.set_title(f"Kooler Ice 410 Pearl St @ {ts.LOCAL_NOW()}")
+        # print(ax)
         #plt.draw()
         plt.pause(60*60*24)
     return None

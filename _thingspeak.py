@@ -55,7 +55,7 @@ def pandas_dataframe(urls):
     print(df_smoothed)  # peek at the raw data
     # put this web data retrieval into permanent storage for future processing options.
     time_now_string = ts.UTC_NOW_STRING()
-    date, time = time_now_string.split("_")  # split date from time
+    date, _time = time_now_string.split("_")  # split date from time
     yy, mm, dd = date.split("-")
     OP = f"{yy}/{mm}/{dd}/"    
     OD = f"{OUTPUT_ROOT}{OP}"
