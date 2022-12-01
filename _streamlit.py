@@ -4,8 +4,8 @@
 
 import streamlit as st
 
-from _thingspeak import url_list
-from _thingspeak import pandas_dataframe
+from Temperature_Mon._thingspeak import url_list
+from Temperature_Mon._thingspeak import pandas_dataframe
 
 
 st.title('Hello World')
