@@ -7,8 +7,8 @@ from loguru import logger
 # import pandas as pd
 import matplotlib.pyplot as plt
 
-from Temperature_Mon._thingspeak import url_list
-from Temperature_Mon._thingspeak import pandas_dataframe
+from _thingspeak import url_list
+from _thingspeak import pandas_dataframe
 
 import cfsiv_utils.time_strings as ts
 
