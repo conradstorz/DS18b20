@@ -276,6 +276,7 @@ def main_data_gathering_loop():
         else:
             print("No devices found.")
         print("Sleeping 1 second...")
+        print('Time delay value ' + str(timedelay))
         time.sleep(1)
 
 
