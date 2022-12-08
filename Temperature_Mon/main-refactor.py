@@ -246,7 +246,9 @@ def send_to_thingspeak(data):
 
 @logger.catch
 def main_data_gathering_loop():
+    time_delay = 0
     while True:
+        # TODO Compress_CSV_files() # CSV files need to be compressed periodically
         retreive_device_names()
         devices = check_devices_have_names()
         if len(devices) > 0:
@@ -260,10 +262,13 @@ def main_data_gathering_loop():
                 for device in device_data:
                     print(device)
                 write_csv(device_data, directory=OD)
-                send_to_thingspeak(device_data)
+                if time_delay >= 14:
+                    send_to_thingspeak(device_data)
+                    time_delay = 0
         else:
             print("No devices found.")
-        print("Sleeping 10 seconds...")
+        print("Sleeping 1 second...")
+        time_delay =+ 1
         time.sleep(10)
 
 
