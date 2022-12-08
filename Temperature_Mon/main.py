@@ -36,7 +36,7 @@ DESCRIPTIONS_MODIFIED = None
 @logger.catch
 def retreive_device_names():
     """Updates GLOBAL data describing device names.
-
+TODO (11-29-2022) Make this function a functional routine and eliminate the GLOBAL variable
     Returns:
         nothing: effect is GLOBAL
     """
@@ -106,6 +106,15 @@ def Detect_Devices(directory=oneWIRE_DEVICE_PATH):
         device_list.append(d[0])
     return device_list
 
+@logger.catch
+def check_devices_have_names():
+    global DEVICE_DESCRIPTIONS
+    devices = check_names_of_devices()
+    with open(oneWIRE_DEVICE_NAMES_FILE, "w") as json_outfile:
+        json.dump(DEVICE_DESCRIPTIONS, json_outfile, indent=4)
+    return devices
+
+
 
 @logger.catch
 def Read_Device(devices: list):
@@ -169,6 +178,8 @@ def Read_Device(devices: list):
 def check_names_of_devices():
     """Take the list of device identifiers and compare to the file of known devices.
     For items not found to have been previously named, allow interactive naming by operator.
+    TODO (11-29-2022) eliminate interactivity and generate a random name for *NEW* divices when found.
+    User may edit JSON file containing names to improve on the random name assigned.
     """
     global DEVICE_DESCRIPTIONS
     devices = Detect_Devices()
@@ -213,8 +224,8 @@ def send_to_thingspeak(data):
     Returns:
         Nothing
     """
-    sorted_dev_data = sorted(data, key=lambda k: k['THINGSPEAK_Channel'])
-    split_by_channel = collections.defaultdict(list)
+    sorted_dev_data = sorted(data, key=lambda k: k['THINGSPEAK_Channel']) #???
+    split_by_channel = collections.defaultdict(list) #???
     for d in sorted_dev_data:
         split_by_channel[d['THINGSPEAK_Channel']].append(d)
     channel_list = list(split_by_channel.values())
@@ -242,10 +253,12 @@ def send_to_thingspeak(data):
 
 @logger.catch
 def main_data_gathering_loop():
+    timedelay = 0
     while True:
         retreive_device_names()
         devices = check_devices_have_names()
         if len(devices) > 0:
+            timedelay =+ 1
             try:
                 timestamp, device_data = Read_Device(devices)
             except IOError as e:
@@ -256,20 +269,15 @@ def main_data_gathering_loop():
                 for device in device_data:
                     print(device)
                 write_csv(device_data, directory=OD)
-                send_to_thingspeak(device_data)
+                # Send data to thingspeak only once per 15 seconds
+                if timedelay >= 14:
+                    send_to_thingspeak(device_data)
+                    timedelay = 0
         else:
             print("No devices found.")
-        print("Sleeping 10 seconds...")
-        time.sleep(10)
-
-
-@logger.catch
-def check_devices_have_names():
-    global DEVICE_DESCRIPTIONS
-    devices = check_names_of_devices()
-    with open(oneWIRE_DEVICE_NAMES_FILE, "w") as json_outfile:
-        json.dump(DEVICE_DESCRIPTIONS, json_outfile, indent=4)
-    return devices
+        print("Sleeping 1 second...")
+        print('Time delay value ' + str(timedelay))
+        time.sleep(1)
 
 
 if __name__ == "__main__":
