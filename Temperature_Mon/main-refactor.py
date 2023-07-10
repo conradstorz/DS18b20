@@ -269,7 +269,7 @@ def main_data_gathering_loop():
             print("No devices found.")
         print("Sleeping 1 second...")
         time_delay =+ 1
-        time.sleep(10)
+        time.sleep(1)
 
 
 @logger.catch

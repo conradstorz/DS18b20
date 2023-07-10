@@ -16,6 +16,9 @@ import cfsiv_utils.time_strings as ts
 @logger.catch
 def matplot_main(urls):
     df = pandas_dataframe(urls)
+    # TODO smooth data
+    # EXAMPLE df = df.interpolate()
+    print(f'THINGSPEAK DATA:\n{df}')
     if df.empty:
         print('No data found to plot.')
     else:
